@@ -1,7 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
-import '../server/loadEnv.ts'
-import { getHealthJson } from '../server/chatApi.ts'
+import { getHealthJson } from '../server/healthJson.ts'
 
 export default function handler(
   _req: VercelRequest,
