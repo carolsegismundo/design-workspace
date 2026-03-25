@@ -10,8 +10,6 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-# Gerado por scripts/bundle-vercel-api.mjs (Vercel roda build e cria de novo)
-api/chat.js
 *.local
 .env
 .env.*

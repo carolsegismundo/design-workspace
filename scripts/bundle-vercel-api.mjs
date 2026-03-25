@@ -1,6 +1,8 @@
 /**
  * Empacota POST /api/chat num único api/chat.js (Node ESM).
  * Evita ERR_MODULE_NOT_FOUND por imports com sufixo .ts na Vercel.
+ * O ficheiro api/chat.js deve estar no Git: a Vercel pode não servir a função
+ * se só existir após o build e estiver em .gitignore.
  */
 import * as esbuild from 'esbuild'
 import path from 'node:path'
