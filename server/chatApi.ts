@@ -1,8 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@supabase/supabase-js'
 
-import { buildChatSystemPrompt } from '../../src/lib/ai/buildChatPrompt.ts'
-import type { Project } from '../../src/types/index.ts'
+import { buildChatSystemPrompt } from '../src/lib/ai/buildChatPrompt.ts'
+import type { Project } from '../src/types/index.ts'
 
 import {
   DEFAULT_GEMINI_MODEL,

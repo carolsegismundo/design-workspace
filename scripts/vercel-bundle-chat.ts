@@ -1,6 +1,10 @@
+/**
+ * Entry só para esbuild — não fica em api/*.ts para a Vercel não expor rota extra.
+ * O build gera api/chat.js (um único bundle; sem imports .ts em runtime).
+ */
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
-import { handleChatPost } from './lib/chatApi.ts'
+import { handleChatPost } from '../server/chatApi.ts'
 
 export const config = {
   api: {
