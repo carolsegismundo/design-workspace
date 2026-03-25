@@ -88,6 +88,20 @@ type ChatAttachmentBody = { mimeType: string; data: string; filename?: string }
 
 function mapGeminiFailure(e: unknown): { status: number; message: string } {
   const raw = e instanceof Error ? e.message : String(e)
+  if (/leaked|API key was reported as leaked|invalid API key.*403/i.test(raw)) {
+    return {
+      status: 403,
+      message:
+        'A Google bloqueou esta chave Gemini (muitas vezes por ter aparecido em Git, logs ou prints). Crie uma chave NOVA em https://aistudio.google.com/apikey , defina GEMINI_API_KEY na Vercel (Environment Variables) e no .env local, e nunca commite chaves — use só placeholders no .env.example.',
+    }
+  }
+  if (/403|Forbidden.*API key|PERMISSION_DENIED/i.test(raw)) {
+    return {
+      status: 403,
+      message:
+        'Gemini recusou a chave (403). Confirme GEMINI_API_KEY na Vercel e que a API Generative Language está ativa no projeto Google Cloud.',
+    }
+  }
   if (/404|not found|not supported for generateContent/i.test(raw)) {
     return {
       status: 502,
