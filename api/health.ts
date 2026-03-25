@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 /** Tudo inline: a Vercel emite .js mas mantém imports `.ts` nos paths; Node não resolve .ts em runtime. */
 const CHAT_API_ID = 'design-agent-board-gemini'
-const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash-lite'
+const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash'
 
 export default function handler(
   _req: VercelRequest,

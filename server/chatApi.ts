@@ -106,7 +106,7 @@ function mapGeminiFailure(e: unknown): { status: number; message: string } {
     return {
       status: 502,
       message:
-        'Modelo Gemini inválido ou descontinuado nesta API. No .env use por exemplo: GEMINI_MODEL=gemini-2.5-flash-lite ou GEMINI_MODEL=gemini-2.5-flash (lista: https://ai.google.dev/gemini-api/docs/models)',
+        'Modelo Gemini inválido ou descontinuado nesta API. No .env use por exemplo: GEMINI_MODEL=gemini-2.5-flash ou GEMINI_MODEL=gemini-2.0-flash (lista: https://ai.google.dev/gemini-api/docs/models)',
     }
   }
   if (
@@ -118,6 +118,17 @@ function mapGeminiFailure(e: unknown): { status: number; message: string } {
       status: 429,
       message:
         'Limite do Gemini atingido (quota ou pedidos por minuto). Aguarde ~1 minuto ou experimente GEMINI_MODEL=gemini-2.5-flash ou gemini-2.5-pro. Detalhes: https://ai.google.dev/gemini-api/docs/rate-limits',
+    }
+  }
+  if (
+    /503|504|Service Unavailable|high demand|temporarily unavailable|overloaded|try again later/i.test(
+      raw
+    )
+  ) {
+    return {
+      status: 503,
+      message:
+        'O modelo Gemini está sobrecarregado agora (503). Tente de novo em 1–2 minutos. Se repetir, na Vercel defina GEMINI_MODEL=gemini-2.0-flash ou gemini-2.5-pro — ou outro modelo da lista https://ai.google.dev/gemini-api/docs/models',
     }
   }
   const short =
@@ -270,23 +281,42 @@ ${snippet}${systemPrompt.length > 900 ? '\n…' : ''}
       parts: [{ text: m.content }],
     }))
     const chat = genModel.startChat({ history: geminiHistory })
-    let text: string
+    const parts: Array<
+      { text: string } | { inlineData: { mimeType: string; data: string } }
+    > = []
+    if (trimmed) {
+      parts.push({ text: trimmed })
+    } else {
+      parts.push({
+        text: 'O utilizador enviou ficheiros ou áudio sem texto. Analise o conteúdo e responda em português (pt-BR), de forma útil e objetiva.',
+      })
+    }
+    for (const a of cleaned) {
+      parts.push({ inlineData: { mimeType: a.mimeType, data: a.data } })
+    }
+
+    let text: string | undefined
+    const maxAttempts = 3
     try {
-      const parts: Array<
-        { text: string } | { inlineData: { mimeType: string; data: string } }
-      > = []
-      if (trimmed) {
-        parts.push({ text: trimmed })
-      } else {
-        parts.push({
-          text: 'O utilizador enviou ficheiros ou áudio sem texto. Analise o conteúdo e responda em português (pt-BR), de forma útil e objetiva.',
-        })
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const geminiResult = await chat.sendMessage(parts)
+          text = geminiResult.response.text()
+          break
+        } catch (err) {
+          const raw = err instanceof Error ? err.message : String(err)
+          const retryable = /503|504|Service Unavailable|high demand|temporarily unavailable|overloaded|try again later/i.test(
+            raw
+          )
+          if (!retryable || attempt === maxAttempts) {
+            throw err
+          }
+          await new Promise((r) => setTimeout(r, 800 * attempt))
+        }
       }
-      for (const a of cleaned) {
-        parts.push({ inlineData: { mimeType: a.mimeType, data: a.data } })
+      if (text === undefined) {
+        throw new Error('Resposta vazia do Gemini')
       }
-      const geminiResult = await chat.sendMessage(parts)
-      text = geminiResult.response.text()
     } catch (geminiErr) {
       console.error(geminiErr)
       const mapped = mapGeminiFailure(geminiErr)

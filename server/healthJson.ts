@@ -1,7 +1,7 @@
 export const CHAT_API_ID = 'design-agent-board-gemini'
 
-/** Modelo estável atual (Google AI); 1.5 foi removido da API v1beta — ver documentação. */
-export const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash-lite'
+/** Padrão: flash completo costuma ter mais capacidade que flash-lite em picos de procura. */
+export const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash'
 
 export function getGeminiApiKey(): string | undefined {
   return (
