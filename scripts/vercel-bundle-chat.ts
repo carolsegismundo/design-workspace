@@ -1,18 +1,11 @@
 /**
- * Entry só para esbuild — não fica em api/*.ts para a Vercel não expor rota extra.
- * O build gera api/chat.js (um único bundle; sem imports .ts em runtime).
+ * Entry só para esbuild — gera api/chat.js (bundle único).
+ * Não usar export const config (api.bodyParser) aqui: isso é do Next.js e no
+ * runtime standalone da Vercel pode corromper o registo da função (ex.: 405).
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 import { handleChatPost } from '../server/chatApi.ts'
-
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '12mb',
-    },
-  },
-}
 
 function corsHeaders(req: VercelRequest): Record<string, string> {
   const origin = req.headers.origin
@@ -41,15 +34,6 @@ export default async function handler(
       res.setHeader(k, v)
     }
     res.status(204).end()
-    return
-  }
-
-  if (method !== 'POST') {
-    for (const [k, v] of Object.entries(corsHeaders(req))) {
-      res.setHeader(k, v)
-    }
-    res.setHeader('Allow', 'POST, OPTIONS')
-    res.status(405).json({ message: 'Method not allowed' })
     return
   }
 
