@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
-import { getHealthJson } from '../server/healthJson.ts'
+import { getHealthJson } from './lib/healthJson.ts'
 
 export default function handler(
   _req: VercelRequest,

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
-import { handleChatPost } from '../server/chatApi.ts'
+import { handleChatPost } from './lib/chatApi.ts'
 
 export const config = {
   api: {

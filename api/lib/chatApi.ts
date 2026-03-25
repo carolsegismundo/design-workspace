@@ -1,6 +1,8 @@
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@supabase/supabase-js'
 
-import type { Project } from '../src/types/index.ts'
+import { buildChatSystemPrompt } from '../../src/lib/ai/buildChatPrompt.ts'
+import type { Project } from '../../src/types/index.ts'
 
 import {
   DEFAULT_GEMINI_MODEL,
@@ -189,9 +191,6 @@ export async function handleChatPost(input: {
 
     let systemPrompt: string
     try {
-      const { buildChatSystemPrompt } = await import(
-        '../src/lib/ai/buildChatPrompt.ts'
-      )
       systemPrompt = buildChatSystemPrompt(project, agentType)
     } catch (e) {
       return {
@@ -244,7 +243,6 @@ ${snippet}${systemPrompt.length > 900 ? '\n…' : ''}
     }
 
     const modelName = process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL
-    const { GoogleGenerativeAI } = await import('@google/generative-ai')
     const genAI = new GoogleGenerativeAI(geminiKey)
     const genModel = genAI.getGenerativeModel({
       model: modelName,

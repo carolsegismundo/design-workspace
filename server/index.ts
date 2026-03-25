@@ -3,12 +3,12 @@ import './loadEnv.ts'
 import cors from 'cors'
 import express from 'express'
 
-import { handleChatPost } from './chatApi.ts'
+import { handleChatPost } from '../api/lib/chatApi.ts'
 import {
   DEFAULT_GEMINI_MODEL,
   getGeminiApiKey,
   getHealthJson,
-} from './healthJson.ts'
+} from '../api/lib/healthJson.ts'
 
 const app = express()
 app.use(cors({ origin: true }))
