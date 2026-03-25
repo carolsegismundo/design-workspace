@@ -29,7 +29,13 @@ export async function sendChatMessage(body: {
     body: JSON.stringify(body),
   })
 
-  const json = (await res.json().catch(() => ({}))) as { message?: string }
+  const raw = await res.text()
+  let json: { message?: string } = {}
+  try {
+    json = JSON.parse(raw) as { message?: string }
+  } catch {
+    json = {}
+  }
 
   if (!res.ok) {
     let msg = json.message ?? res.statusText
@@ -39,8 +45,11 @@ export async function sendChatMessage(body: {
         'Outro programa na mesma porta da API devolveu erro antigo (Anthropic). Este app usa Gemini na porta definida por CHAT_API_PORT (padrão 3002). Pare todos os Node, confirme no .env CHAT_API_PORT=3002, rode `npm run dev` e abra `/api/health` — deve aparecer "chatApi":"design-agent-board-gemini".'
     } else if (upstream && upstream !== 'design-agent-board-gemini') {
       msg = `${msg} (API inesperada: ${upstream})`
+    } else if (!json.message && raw.trimStart().startsWith('<')) {
+      msg =
+        'Resposta HTML em vez de JSON — a rota /api pode estar indo para o site. Abra no navegador: /api/health (deve aparecer JSON com "ok": true).'
     }
-    throw new Error(msg)
+    throw new Error(`[HTTP ${res.status}] ${msg}`)
   }
 
   return { message: json.message ?? '' }
