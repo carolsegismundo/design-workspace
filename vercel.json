@@ -2,11 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build",
   "functions": {
-    "api/**/*.ts": {
-      "memory": 1024,
-      "maxDuration": 60
-    },
-    "api/**/*.js": {
+    "api/*": {
       "memory": 1024,
       "maxDuration": 60
     }
